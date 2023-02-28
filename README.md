@@ -67,7 +67,10 @@ serverless deploy
 
  Url for postman config file: https://drive.google.com/drive/folders/1kvG7Rvu9682_TgapH_8tMj7mXFPvI_hy?usp=share_link
 
- 
+
+ Tests: 
+
+ ![Captura de pantalla_20230228_120740](https://user-images.githubusercontent.com/20606919/221759617-0b5d2b29-142f-44f9-b225-9208ba7fea8c.png)
 
 
 
