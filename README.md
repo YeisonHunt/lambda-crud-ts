@@ -80,6 +80,10 @@ serverless deploy
 
  ![image](https://user-images.githubusercontent.com/20606919/221967544-5c0e344c-8b37-46b2-83c6-2cb6ff1b5717.png)
 
+ Then the file type must be choosen, like this:
+
+ ![image](https://user-images.githubusercontent.com/20606919/221968221-6493fd24-0fba-4006-85d5-d712398f0787.png)
+
 
  Tests: 
 
