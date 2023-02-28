@@ -30,6 +30,12 @@ or
 yarn install
 ```
 
+## Testing
+
+```
+npm run test
+```
+
 ## Deployment
 
 Run:
@@ -74,3 +80,10 @@ serverless deploy
 
 
 
+### Refactorization pending
+
+
+- [ ] Tests .. Working on it.
+- [ ] Products 
+- [ ] Category 
+- [ ] Folder and file organization
