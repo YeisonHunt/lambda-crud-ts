@@ -1,8 +1,8 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
-import * as yup from "yup";
 import { secrets } from "../helpers/secrets";
+import { handleError, HttpError, schema } from "../helpers/utils";
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 const tableName = "CategoriesTable";
@@ -10,11 +10,7 @@ const headers = {
     "content-type": "application/json",
 };
 
-// Validation schema
-const schema = yup.object().shape({
-    name: yup.string().required(),
-    description: yup.string().required(),
-});
+
 
 export const addImageToCategory = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
 
@@ -99,41 +95,6 @@ export const createCategory = async (event: APIGatewayProxyEvent): Promise<APIGa
     }
 };
 
-export class HttpError extends Error {
-    constructor(public statusCode: number, body: Record<string, unknown> = {}) {
-        super(JSON.stringify(body));
-    }
-}
-
-const handleError = (e: unknown) => {
-    if (e instanceof yup.ValidationError) {
-        return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({
-                errors: e.errors,
-            }),
-        };
-    }
-
-    if (e instanceof SyntaxError) {
-        return {
-            statusCode: 400,
-            headers,
-            body: JSON.stringify({ error: `invalid request body format : "${e.message}"` }),
-        };
-    }
-
-    if (e instanceof HttpError) {
-        return {
-            statusCode: e.statusCode,
-            headers,
-            body: e.message,
-        };
-    }
-
-    throw e;
-};
 
 const fetchCategoryById = async (id: string) => {
     const output = await docClient
