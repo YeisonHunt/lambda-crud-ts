@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 import * as yup from "yup";
-import { secrets } from "./secrets";
+import { secrets } from "../helpers/secrets";
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 const tableName = "CategoriesTable";

@@ -86,4 +86,4 @@ serverless deploy
 - [ ] Tests .. Working on it.
 - [ ] Products 
 - [ ] Category 
-- [ ] Folder and file organization
+- [x] Folder and file organization

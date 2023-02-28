@@ -1,7 +1,7 @@
 import 'jest';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as yup from "yup";
-import { addImageToProduct, createProduct, deleteProduct, getProduct, listProduct } from "./product";
+import { addImageToProduct, createProduct, deleteProduct, getProduct, listProduct } from "../../services/product";
 
 const modifiedProduct = {
     Item: {

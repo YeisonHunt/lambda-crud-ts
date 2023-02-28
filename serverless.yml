@@ -41,73 +41,73 @@ provider:
 
 functions:
   createProduct:
-    handler: src/product.createProduct
+    handler: src/services/product.createProduct
     events:
       - httpApi:
           path: /product
           method: post
   addImageToProduct:
-    handler: src/product.addImageToProduct
+    handler: src/services/product.addImageToProduct
     events:
       - httpApi:
           path: /product/addImage/{id}
           method: put
   getProduct:
-    handler: src/product.getProduct
+    handler: src/services/product.getProduct
     events:
       - httpApi:
           path: /product/{id}
           method: get
   updateProduct:
-    handler: src/product.updateProduct
+    handler: src/services/product.updateProduct
     events:
       - httpApi:
           path: /product/{id}
           method: put
   deleteProduct:
-    handler: src/product.deleteProduct
+    handler: src/services/product.deleteProduct
     events:
       - httpApi:
           path: /product/{id}
           method: delete
   listProduct:
-    handler: src/product.listProduct
+    handler: src/services/product.listProduct
     events:
       - httpApi:
           path: /products
           method: get
   createCategory:
-    handler: src/category.createCategory
+    handler: src/services/category.createCategory
     events:
       - httpApi:
           path: /category
           method: post
   addImageToCategory:
-    handler: src/category.addImageToCategory
+    handler: src/services/category.addImageToCategory
     events:
       - httpApi:
           path: /category/addImage/{id}
           method: put
   getCategory:
-    handler: src/category.getCategory
+    handler: src/services/category.getCategory
     events:
       - httpApi:
           path: /category/{id}
           method: get
   updateCategory:
-    handler: src/category.updateCategory
+    handler: src/services/category.updateCategory
     events:
       - httpApi:
           path: /category/{id}
           method: put
   deleteCategory:
-    handler: src/category.deleteCategory
+    handler: src/services/category.deleteCategory
     events:
       - httpApi:
           path: /category/{id}
           method: delete
   listCategory:
-    handler: src/category.listCategory
+    handler: src/services/category.listCategory
     events:
       - httpApi:
           path: /categories
