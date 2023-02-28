@@ -1,17 +1,8 @@
 import 'jest';
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
+import { APIGatewayEventDefaultAuthorizerContext, APIGatewayEventRequestContextWithAuthorizer, APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as yup from "yup";
 import { addImageToProduct, createProduct, deleteProduct, getProduct, listProduct } from "../../services/product";
-
-const modifiedProduct = {
-    Item: {
-        productID: "1",
-        name: "Modified Product",
-        description: "This is a modified product.",
-        price: 9.99,
-        images:[]
-    }
-}
+import { modifiedProduct, mockProduct, mockEvent } from "../mocks/mocks";
 
 //mock jest and his region config
 jest.mock("aws-sdk", () => {
@@ -124,35 +115,6 @@ jest.mock("aws-sdk", () => {
 });
 
 
-// set up a mock event and product data for testing
-// @ts-ignore checking headers
-const mockEvent: APIGatewayProxyEvent = {
-    body: JSON.stringify({
-        name: "Test Product",
-        description: "This is a test product.",
-        price: 9.99,
-        images:[]
-    }),
-    httpMethod: "POST",
-    path: "/products",
-    headers: {},
-    multiValueHeaders: {},
-    queryStringParameters: null,
-    multiValueQueryStringParameters: null,
-    pathParameters: null,
-    stageVariables: null,
-    isBase64Encoded: false,
-};
-
-
-const mockProduct = {
-    name: "Test Product",
-    description: "This is a test product.",
-    price: 9.99,
-    productID: expect.any(String),
-    images:[]
-};
-
 // create a mock of the yup object validation
 const mockValidate = jest.spyOn(yup.object.prototype, "validate");
 
@@ -186,13 +148,13 @@ describe("product CRUD tests", () => {
 
     //  Get Product by ID tests
     it("should fetch a product by ID", async () => {
-        // @ts-ignore checking headers
+       
         const mockEvent: APIGatewayProxyEvent = {
             body: JSON.stringify({
                 name: "Test Product",
                 description: "This is a test product.",
                 price: 9.99,
-                images:[]
+                images: []
             }),
             httpMethod: "GET",
             path: "/products/",
@@ -203,6 +165,8 @@ describe("product CRUD tests", () => {
             pathParameters: { id: "1" },
             stageVariables: null,
             isBase64Encoded: false,
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+            resource: ''
         };
         const result: APIGatewayProxyResult = await getProduct(mockEvent);
         expect(result.statusCode).toBe(200);
@@ -211,13 +175,13 @@ describe("product CRUD tests", () => {
     });
 
     it("should return 404 for a non existing product", async () => {
-        // @ts-ignore checking headers
+
         const mockEvent: APIGatewayProxyEvent = {
             body: JSON.stringify({
                 name: "Test Product",
                 description: "This is a test product.",
                 price: 9.99,
-                images:[]
+                images: []
             }),
             httpMethod: "GET",
             path: "/products/",
@@ -226,8 +190,10 @@ describe("product CRUD tests", () => {
             queryStringParameters: null,
             multiValueQueryStringParameters: null,
             pathParameters: { id: "2" },
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
             stageVariables: null,
             isBase64Encoded: false,
+            resource: ''
         };
         const result: APIGatewayProxyResult = await getProduct(mockEvent);
         expect(result.statusCode).toBe(404);
@@ -236,7 +202,7 @@ describe("product CRUD tests", () => {
 
     // Update product tests
     it("should update a product by ID", async () => {
-        // @ts-ignore checking headers
+        
         const mockEvent: APIGatewayProxyEvent = {
             body: JSON.stringify(modifiedProduct),
             httpMethod: "PUT",
@@ -248,6 +214,8 @@ describe("product CRUD tests", () => {
             pathParameters: { id: "1" },
             stageVariables: null,
             isBase64Encoded: false,
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+            resource: ''
         };
         const result: APIGatewayProxyResult = await getProduct(mockEvent);
         expect(result.statusCode).toBe(200);
@@ -258,7 +226,7 @@ describe("product CRUD tests", () => {
     });
 
     it("should not update a product if the product doesnt exist", async () => {
-        // @ts-ignore checking headers
+        
         const mockEvent: APIGatewayProxyEvent = {
             body: JSON.stringify(modifiedProduct),
             httpMethod: "PUT",
@@ -270,6 +238,8 @@ describe("product CRUD tests", () => {
             pathParameters: { id: "99" },
             stageVariables: null,
             isBase64Encoded: false,
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+            resource: ''
         };
         const result: APIGatewayProxyResult = await getProduct(mockEvent);
         expect(result.statusCode).toBe(404);
@@ -279,7 +249,7 @@ describe("product CRUD tests", () => {
 
     // Delete product tests
     it("delete a product by his ID", async () => {
-        // @ts-ignore checking headers
+        
         const mockEvent: APIGatewayProxyEvent = {
             body: JSON.stringify(modifiedProduct),
             httpMethod: "DELETE",
@@ -291,6 +261,8 @@ describe("product CRUD tests", () => {
             pathParameters: { id: "1" },
             stageVariables: null,
             isBase64Encoded: false,
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+            resource: ''
         };
         const result: APIGatewayProxyResult = await deleteProduct(mockEvent);
         expect(result.statusCode).toBe(204);
@@ -298,7 +270,7 @@ describe("product CRUD tests", () => {
     });
 
     it("should not delete if the product doesnt exist", async () => {
-        // @ts-ignore checking headers
+        
         const mockEvent: APIGatewayProxyEvent = {
             body: JSON.stringify(modifiedProduct),
             httpMethod: "DELETE",
@@ -310,6 +282,8 @@ describe("product CRUD tests", () => {
             pathParameters: { id: "99" },
             stageVariables: null,
             isBase64Encoded: false,
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+            resource: ''
         };
 
         const NotFoundError = { "body": "{\"error\":\"not found\"}", "headers": { "content-type": "application/json" }, "statusCode": 404 }
@@ -342,7 +316,7 @@ describe("product CRUD tests", () => {
             ]
         }
 
-        // @ts-ignore checking headers
+        
         const mockEvent: APIGatewayProxyEvent = {
             body: null,
             httpMethod: "GET",
@@ -353,6 +327,9 @@ describe("product CRUD tests", () => {
             multiValueQueryStringParameters: null,
             stageVariables: null,
             isBase64Encoded: false,
+            pathParameters: null,
+            requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+            resource: ''
         };
         const result: APIGatewayProxyResult = await listProduct(mockEvent);
         expect(result.statusCode).toBe(200);
@@ -362,17 +339,25 @@ describe("product CRUD tests", () => {
 
     it("should update image to S3 to specific product", async () => {
 
-        // @ts-ignore checking headers
+        
           const mockEvent: APIGatewayProxyEvent = {
-            body: "data:image/jpeg;base64,/9j/4AAQSkZJRgA...", // base64-encoded image data
-            headers: {
-            "content-type": "image/jpeg",
-            },
-            isBase64Encoded: true,
-            pathParameters: {
-            id: "1",
-            },
-        };
+              body: "data:image/jpeg;base64,/9j/4AAQSkZJRgA...",
+              headers: {
+                  "content-type": "image/jpeg",
+              },
+              isBase64Encoded: true,
+              pathParameters: {
+                  id: "1",
+              },
+              multiValueHeaders: {},
+              httpMethod: '',
+              path: '',
+              queryStringParameters: null,
+              multiValueQueryStringParameters: null,
+              stageVariables: null,
+              requestContext: {} as APIGatewayEventRequestContextWithAuthorizer<APIGatewayEventDefaultAuthorizerContext>,
+              resource: ''
+          };
         const result: APIGatewayProxyResult = await addImageToProduct(mockEvent);
         expect(result.statusCode).toBe(200);
         expect(result.headers).toEqual({ "content-type": "application/json" });

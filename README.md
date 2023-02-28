@@ -83,7 +83,7 @@ serverless deploy
 ### Refactorization pending
 
 
-- [ ] Tests .. Working on it.
+- [x] Tests
 - [ ] Products 
 - [ ] Category 
 - [x] Folder and file organization
