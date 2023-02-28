@@ -1,7 +1,7 @@
 import 'jest';
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import * as yup from "yup";
-import { createProduct, deleteProduct, getProduct, listProduct } from "./handlers";
+import { addImageToProduct, createProduct, deleteProduct, getProduct, listProduct } from "./product";
 
 const modifiedProduct = {
     Item: {
@@ -9,7 +9,7 @@ const modifiedProduct = {
         name: "Modified Product",
         description: "This is a modified product.",
         price: 9.99,
-        available: false,
+        images:[]
     }
 }
 
@@ -25,14 +25,14 @@ jest.mock("aws-sdk", () => {
                     name: "Test Product",
                     description: "This is a test product.",
                     price: 9.99,
-                    available: true,
+                    images:[]
                 },
                 {
                     productID: "2",
                     name: "Test Product 2",
                     description: "This is a test product 2.",
                     price: 109.99,
-                    available: false,
+                    images:[]
                 }
             ]
         }),
@@ -46,7 +46,7 @@ jest.mock("aws-sdk", () => {
                 name: "Test Product",
                 description: "This is a test product.",
                 price: 9.99,
-                available: true,
+                images:[]
             }
         }),
     };
@@ -59,7 +59,7 @@ jest.mock("aws-sdk", () => {
                 name: "Modified Product",
                 description: "This is a modified product.",
                 price: 9.99,
-                available: false,
+                images:[]
             }
         }),
         promise: jest.fn().mockReturnValue({
@@ -68,7 +68,7 @@ jest.mock("aws-sdk", () => {
                 name: "Test Product",
                 description: "This is a test product.",
                 price: 9.99,
-                available: true,
+                images:[]
             }
         }),
     };
@@ -80,7 +80,7 @@ jest.mock("aws-sdk", () => {
                 name: "Modified Product",
                 description: "This is a modified product.",
                 price: 9.99,
-                available: false,
+                images:[]
             }
         }),
         promise: jest.fn().mockReturnValue({
@@ -89,7 +89,7 @@ jest.mock("aws-sdk", () => {
                 name: "Modified Product",
                 description: "This is a modified product.",
                 price: 9.99,
-                available: false,
+                images:[]
             }
         }),
     };
@@ -102,6 +102,12 @@ jest.mock("aws-sdk", () => {
         scan: jest.fn().mockReturnValue(mockDynamoScan)
     };
 
+    const s3Mocked = {
+        promise: jest.fn().mockReturnValue({
+            Location: "https://test-bucket.s3.amazonaws.com/test-image.png",
+        })
+    }
+
     return {
         config: {
             update: jest.fn(),
@@ -110,6 +116,10 @@ jest.mock("aws-sdk", () => {
         DynamoDB: {
             DocumentClient: jest.fn(() => mockDocumentClient),
         },
+
+        S3: jest.fn().mockReturnValue({
+            upload: jest.fn(() => s3Mocked)
+        }) 
     };
 });
 
@@ -121,7 +131,7 @@ const mockEvent: APIGatewayProxyEvent = {
         name: "Test Product",
         description: "This is a test product.",
         price: 9.99,
-        available: true,
+        images:[]
     }),
     httpMethod: "POST",
     path: "/products",
@@ -139,8 +149,8 @@ const mockProduct = {
     name: "Test Product",
     description: "This is a test product.",
     price: 9.99,
-    available: true,
     productID: expect.any(String),
+    images:[]
 };
 
 // create a mock of the yup object validation
@@ -148,10 +158,6 @@ const mockValidate = jest.spyOn(yup.object.prototype, "validate");
 
 // set up the tests
 describe("product CRUD tests", () => {
-
-    beforeEach(() => {
-
-    });
 
     afterEach(() => {
         jest.clearAllMocks();
@@ -186,7 +192,7 @@ describe("product CRUD tests", () => {
                 name: "Test Product",
                 description: "This is a test product.",
                 price: 9.99,
-                available: true,
+                images:[]
             }),
             httpMethod: "GET",
             path: "/products/",
@@ -211,7 +217,7 @@ describe("product CRUD tests", () => {
                 name: "Test Product",
                 description: "This is a test product.",
                 price: 9.99,
-                available: true,
+                images:[]
             }),
             httpMethod: "GET",
             path: "/products/",
@@ -318,21 +324,20 @@ describe("product CRUD tests", () => {
     it("should list all products", async () => {
 
         const items = {
-
             Items: [
                 {
                     productID: "1",
                     name: "Test Product",
                     description: "This is a test product.",
                     price: 9.99,
-                    available: true,
+                    images:[]
                 },
                 {
                     productID: "2",
                     name: "Test Product 2",
                     description: "This is a test product 2.",
                     price: 109.99,
-                    available: false,
+                    images:[]
                 }
             ]
         }
@@ -354,6 +359,26 @@ describe("product CRUD tests", () => {
         expect(result.headers).toEqual({ "content-type": "application/json" });
         expect(JSON.parse(result.body)).toEqual(items.Items);
     });
+
+    it("should update image to S3 to specific product", async () => {
+
+        // @ts-ignore checking headers
+          const mockEvent: APIGatewayProxyEvent = {
+            body: "data:image/jpeg;base64,/9j/4AAQSkZJRgA...", // base64-encoded image data
+            headers: {
+            "content-type": "image/jpeg",
+            },
+            isBase64Encoded: true,
+            pathParameters: {
+            id: "1",
+            },
+        };
+        const result: APIGatewayProxyResult = await addImageToProduct(mockEvent);
+        expect(result.statusCode).toBe(200);
+        expect(result.headers).toEqual({ "content-type": "application/json" });
+        expect(result.body).toBe("Image added successfully");
+    });
+
 
 
 });

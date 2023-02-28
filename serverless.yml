@@ -25,7 +25,6 @@ provider:
   runtime: nodejs12.x
   lambdaHashingVersion: 20201221
 
-
   iam:
     role:
       statements:
@@ -37,38 +36,81 @@ provider:
             - "dynamodb:Scan"
           Resource:
             - { "Fn::GetAtt": ["ProductsTable", "Arn"] }
+            - { "Fn::GetAtt": ["CategoriesTable", "Arn"] }
 
 
 functions:
   createProduct:
-    handler: src/handlers.createProduct
+    handler: src/product.createProduct
     events:
       - httpApi:
           path: /product
           method: post
+  addImageToProduct:
+    handler: src/product.addImageToProduct
+    events:
+      - httpApi:
+          path: /product/addImage/{id}
+          method: put
   getProduct:
-    handler: src/handlers.getProduct
+    handler: src/product.getProduct
     events:
       - httpApi:
           path: /product/{id}
           method: get
   updateProduct:
-    handler: src/handlers.updateProduct
+    handler: src/product.updateProduct
     events:
       - httpApi:
           path: /product/{id}
           method: put
   deleteProduct:
-    handler: src/handlers.deleteProduct
+    handler: src/product.deleteProduct
     events:
       - httpApi:
           path: /product/{id}
           method: delete
   listProduct:
-    handler: src/handlers.listProduct
+    handler: src/product.listProduct
     events:
       - httpApi:
           path: /products
+          method: get
+  createCategory:
+    handler: src/category.createCategory
+    events:
+      - httpApi:
+          path: /category
+          method: post
+  addImageToCategory:
+    handler: src/category.addImageToCategory
+    events:
+      - httpApi:
+          path: /category/addImage/{id}
+          method: put
+  getCategory:
+    handler: src/category.getCategory
+    events:
+      - httpApi:
+          path: /category/{id}
+          method: get
+  updateCategory:
+    handler: src/category.updateCategory
+    events:
+      - httpApi:
+          path: /category/{id}
+          method: put
+  deleteCategory:
+    handler: src/category.deleteCategory
+    events:
+      - httpApi:
+          path: /category/{id}
+          method: delete
+  listCategory:
+    handler: src/category.listCategory
+    events:
+      - httpApi:
+          path: /categories
           method: get
 
 
@@ -89,4 +131,17 @@ resources:
             AttributeType: S
         KeySchema:
           - AttributeName: productID
+            KeyType: HASH
+    CategoriesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: CategoriesTable
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        AttributeDefinitions:
+          - AttributeName: categoryID
+            AttributeType: S
+        KeySchema:
+          - AttributeName: categoryID
             KeyType: HASH

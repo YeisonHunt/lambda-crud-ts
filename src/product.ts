@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import AWS from "aws-sdk";
 import { v4 } from "uuid";
 import * as yup from "yup";
+import { secrets } from "./secrets";
 
 const docClient = new AWS.DynamoDB.DocumentClient();
 const tableName = "ProductsTable";
@@ -9,14 +10,70 @@ const headers = {
   "content-type": "application/json",
 };
 
+
+// Validation schema
 const schema = yup.object().shape({
   name: yup.string().required(),
   description: yup.string().required(),
   price: yup.number().required(),
-  available: yup.bool().required(),
 });
 
+export const addImageToProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+
+  try {
+
+    const BUCKET_NAME = secrets.S3_BUCKET_NAME;
+    const s3 = new AWS.S3({
+      accessKeyId: secrets.S3_ACCESS_KEY_ID,
+      secretAccessKey: secrets.S3_SECRET_ACCESS_KEY
+    });
+
+    const id = event.pathParameters?.id as string;
+
+    const product = await fetchProductById(id);
+
+    // Check if there are any files in the event
+    if (event?.isBase64Encoded && event?.body) {
+      const mimeType = event.headers["content-type"];
+      const fileName = mimeType ? `image_${product.productID}.${mimeType.split("/")[1]}` : "";
+
+      const base64Data = event.body ? event.body.replace(/^data:image\/\w+;base64,/, "") : "";
+      const buffer = Buffer.from(base64Data, "base64");
+
+      const params = {
+        Bucket: BUCKET_NAME,
+        Key: fileName,
+        Body: buffer,
+        ContentEncoding: "base64",
+        ContentType: mimeType,
+      };
+
+      const s3Object = await s3.upload(params).promise();
+
+      // Add S3 object URL to product object
+      product.images.push(s3Object.Location);
+    }
+
+    await docClient
+      .put({
+        TableName: tableName,
+        Item: product,
+      })
+      .promise();
+
+    return {
+      statusCode: 200,
+      headers,
+      body: "Image added successfully",
+    };
+  } catch (e) {
+    return handleError(e);
+  }
+}
+
 export const createProduct = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+
+
   try {
     const reqBody = JSON.parse(event.body as string);
 
