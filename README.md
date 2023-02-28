@@ -80,10 +80,9 @@ serverless deploy
 
 
 
-### Refactorization pending
-
+### Refactorization done 28/02/2023
 
 - [x] Tests
-- [ ] Products 
-- [ ] Category 
+- [x] Products 
+- [x] Category 
 - [x] Folder and file organization
